@@ -1,0 +1,16 @@
+# secrets: never commit your API key
+.env
+.streamlit/secrets.toml
+
+# python junk
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# big or regenerable files
+cache/
+data/raw/*.graphml
+eval/results/*.csv
+!eval/results/.gitkeep
