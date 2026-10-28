@@ -1,0 +1,16 @@
+{
+  "id": "T001",
+  "request_text": "Plan my Saturday: farmers market before noon, lunch under $20, library by 3pm, home by 6pm. Keep total driving under 45 minutes and total spend under $30.",
+  "start_place_id": "P_home_01",
+  "end_place_id": "P_home_01",
+  "day_start": "09:00",
+  "day_end": "18:00",
+  "budget_usd": 30,
+  "max_drive_min": 45,
+  "stops": [
+    {"id": "s1", "kind": "fixed", "place_id": "P_market_01", "window": ["09:00", "12:00"], "duration_min": 60},
+    {"id": "s2", "kind": "flexible", "category": "restaurant", "max_price_usd": 20, "window": ["11:30", "14:00"], "duration_min": 45},
+    {"id": "s3", "kind": "fixed", "place_id": "P_library_01", "window": ["12:00", "15:00"], "duration_min": 60}
+  ],
+  "difficulty": "easy"
+}
