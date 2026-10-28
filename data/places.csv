@@ -1,0 +1,5 @@
+id,name,category,lat,lon,price_usd,open,close
+P_home_01,Home (SJSU),home,37.3352,-121.8811,0,00:00,23:59
+P_market_01,Example Farmers Market,farmers_market,37.3363,-121.8906,0,09:00,13:00
+P_rest_01,Example Taqueria,restaurant,37.3300,-121.8850,14,11:00,21:00
+P_library_01,Example Library,library,37.3354,-121.8850,0,09:00,20:00
