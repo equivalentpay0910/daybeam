@@ -30,7 +30,7 @@ def ask(prompt: str, schema=None, temperature: float = 0.0, seed: int = 0) -> di
     schema: optional Pydantic model; if given, the model must reply in that JSON shape.
     seed:   change it to get a different (but still cached) sample for repeated runs.
     """
-    model = os.getenv("DAYBEAM_MODEL", "gemini-2.5-flash")
+    model = os.getenv("DAYBEAM_MODEL", "gemini-3.8-flash")
     key = hashlib.sha256(json.dumps(
         [model, prompt, schema.__name__ if schema else None, temperature, seed]).encode()).hexdigest()
     if key in _cache:
