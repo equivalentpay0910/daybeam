@@ -2,31 +2,45 @@
 import osmnx as ox
 import heapq # module to create the priority queue that A* needs.
 import math
+from pathlib import Path
 
-"""
-load road network function:
-Loads the driving road network around SJSU using OSMnx.
-Adds estimated road speeds and travel times for A* routing.
-Returns the road graph.
-"""
+
+# Loads the driving road network around SJSU.
+# Reuses a saved graph when available to avoid repeated downloads.
+# Adds estimated speeds and travel times for A* routing.
+
 def load_road_network():
-    ox.settings.use_cache = True # Reuse cached OpenStreetMap responses when available
-    # Coordinates near San Jose State University (latitude, longitude)
-    center = (37.3352, -121.8811) #Sets the center of our San José study area
+    ox.settings.use_cache = True
 
-    # Download streets within 1500 meters of the center
-    #Uses an approximately 1.5 km radius
+    # Location for saving the processed road graph
+    project_folder = Path(__file__).resolve().parent.parent
+    graph_file = project_folder / "cache" / "sjsu_roads.graphml"
+
+    # Load the saved graph if it already exists
+    if graph_file.exists():
+        return ox.io.load_graphml(graph_file)
+
+    # Otherwise, download the road network
+    center = (37.3352, -121.8811)
+
     graph = ox.graph_from_point(
         center,
         dist=1500,
-        network_type="drive" #Includes roads available for driving
+        network_type="drive"
     )
 
-    # Add estimated road speeds and driving times
+    # Add estimated road speeds and travel times
     graph = ox.routing.add_edge_speeds(graph)
     graph = ox.routing.add_edge_travel_times(graph)
 
+    # Create the cache folder if needed
+    graph_file.parent.mkdir(parents=True, exist_ok=True)
+
+    # Save the graph for future runs
+    ox.io.save_graphml(graph, graph_file)
+
     return graph
+
 # above code results: 620 nodes	Road intersections and other road-network connection points
 # 1,567 edges	Directed road segments connecting those nodes
 
