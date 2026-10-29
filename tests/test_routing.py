@@ -35,3 +35,39 @@ def test_astar_matches_networkx(road_graph):
     # Check the first and last nodes of the returned route
     assert path[0] == start
     assert path[-1] == goal
+
+
+
+
+"""
+Next Function:
+Allows pytest to run the same test with several different inputs. 
+Instead of writing five nearly identical tests, we specify five start-goal pairs.
+Each pair becomes a separate test case.
+Tests A* on several different routes to make sure it returns the same shortest driving time as NetworkX.
+"""
+
+@pytest.mark.parametrize("start_index, goal_index", [
+    (0, 50),
+    (10, 150),
+    (20, 200),
+    (100, 300),
+    (250, 500),
+])
+def test_astar_multiple_routes(road_graph, start_index, goal_index):
+    nodes = list(road_graph.nodes)
+
+    start = nodes[start_index]
+    goal = nodes[goal_index]
+
+    # Run our A* algorithm
+    path, our_time = astar_search(road_graph, start, goal)
+
+    # Compare against NetworkX shortest travel time
+    expected_time = nx.shortest_path_length(
+        road_graph, start, goal, weight="travel_time"
+    )
+
+    assert our_time == pytest.approx(expected_time, abs=0.001)
+    assert path[0] == start
+    assert path[-1] == goal
