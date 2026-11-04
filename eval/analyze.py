@@ -31,6 +31,14 @@ def summarize(df: pd.DataFrame) -> pd.DataFrame:
 
 def main(path="eval/results/results.csv"):
     df = pd.read_csv(path)
+    # Runs that failed because Gemini was busy / rate-limited are NOT the planner's fault: leave them out
+    api_fail = df["error"].fillna("").str.contains("429|503|RESOURCE_EXHAUSTED|UNAVAILABLE|Daily free-tier", regex=True)
+    if api_fail.any():
+        print(f"Skipping {int(api_fail.sum())} runs that failed because of Gemini limits (re-run them later; finished runs are cached).")
+    df = df[~api_fail].copy()
+    if df.empty:
+        print("No usable runs yet. Re-run eval.run_eval once Gemini is available.")
+        return
     df["passed"] = df["passed"].astype(str).str.lower().eq("true")
     df["n_violations"] = pd.to_numeric(df["n_violations"], errors="coerce").fillna(0)
     df["tokens_total"] = df["tokens_in"] + df["tokens_out"]
