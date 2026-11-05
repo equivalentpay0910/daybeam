@@ -111,6 +111,8 @@ def plan_beam(task: Task, seed: int = 0, beam_width: int = 3, **kwargs) -> PlanR
                     new_beam.append((node.node_id, child))
             beam = new_beam
 
+        if not beam:
+            raise RuntimeError("No candidate plans (no places match a requested category?)")
         best_partial = beam[0][1]  # highest-scored complete plan
         return PlanResult(plan=Plan(task_id=task.id, stops=best_partial), method="beam", search_log=log,
                           llm_calls=calls, tokens_in=tin, tokens_out=tout,

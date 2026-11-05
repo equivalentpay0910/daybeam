@@ -37,18 +37,31 @@ def which_tools() -> dict:
 
 # ---------- places ----------
 @lru_cache(maxsize=1)
-def load_places() -> tuple[Place, ...]:
-    for path in ("data/places.csv", "data/places_dev.csv", "data/places_sample.csv"):
+def _all_places() -> dict:
+    out = {}
+    for path in ("data/places_sample.csv", "data/places_dev.csv", "data/places.csv"):
         if os.path.exists(path):
             with open(path, newline="") as f:
-                return tuple(Place(**row) for row in csv.DictReader(f))
-    raise FileNotFoundError("No places file found in data/")
+                out.update({row["id"]: Place(**row) for row in csv.DictReader(f)})
+    return out
+
+
+def load_places() -> tuple[Place, ...]:
+    """The places the planners may use.
+    Once Kami's data/places.csv is a real list (20+ places), use ONLY that file.
+    Until then, combine it with the DEV places so the practice tasks still work."""
+    real = {}
+    if os.path.exists("data/places.csv"):
+        with open("data/places.csv", newline="") as f:
+            real = {row["id"]: Place(**row) for row in csv.DictReader(f)}
+    if len(real) >= 20:
+        return tuple(real.values())
+    return tuple(_all_places().values())
 
 
 def _standin_get_place(place_id: str) -> Place:
-    for p in load_places():
-        if p.id == place_id:
-            return p
+    if place_id in _all_places():
+        return _all_places()[place_id]
     raise KeyError(f"Unknown place id: {place_id}")
 
 
@@ -79,7 +92,17 @@ def _standin_route(a_place_id, b_place_id, return_path=False):
 # ---------- wire up real-or-stand-in ----------
 from tools import places as _kami_places, routing as _kami_routing, verifier as _kami_verifier  # noqa: E402
 
-get_place = _try(_kami_places.get_place, _standin_get_place, "get_place")
+_real_get_place = _try(_kami_places.get_place, _standin_get_place, "get_place")
+
+
+def get_place(place_id: str) -> Place:
+    """Look in Kami's data/places.csv first; if the id isn't there (e.g. a DEV place used by
+    the practice tasks), fall back to the dev/sample files."""
+    try:
+        return _real_get_place(place_id)
+    except (KeyError, ValueError):
+        return _standin_get_place(place_id)
+
 find_places = _try(_kami_places.find_places, _standin_find_places, "find_places")
 route = _try(_kami_routing.route, _standin_route, "route")
 
@@ -104,7 +127,7 @@ def simulate(task: Task, stops: list[PlannedStop], finish: bool = True) -> Check
         seen.add(ps.stop_id)
         try:
             place = get_place(ps.place_id)
-        except KeyError:
+        except (KeyError, ValueError):
             violations.append(Violation(rule="unknown_place", stop_id=ps.stop_id, detail=ps.place_id))
             continue
         if r.kind == "fixed" and ps.place_id != r.place_id:
