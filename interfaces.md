@@ -71,8 +71,17 @@ plan(task, method="one_shot"|"react"|"beam", seed=0, beam_width=3) -> PlanResult
 **SearchNode** (for the tree view): `node_id, parent_id, depth, partial_plan, score, kept`.
 Root has `parent_id = None`. `kept = False` means beam search pruned it (draw it gray).
 
+## Development stand-ins (so nobody is blocked)
+Planners call tools only through `agent/toolbox.py`. It uses Kami's real `tools/` functions as soon as
+they stop raising `NotImplementedError`, and otherwise falls back to stand-ins:
+straight-line distance x 1.3 at 30 km/h for `route()`, `data/places_dev.csv` (fake DEV places) for places,
+and a reference `check_plan()` that follows the simulation rules above. `which_tools()` reports which are in use.
+Kami: when your real version works, the planners switch to it automatically. Use the reference
+`simulate()` in `agent/toolbox.py` to cross-check your verifier.
+
 ## Evaluation
 `python -m eval.run_eval` runs 3 planners x every task x seeds 0,1,2 -> `eval/results/results.csv`.
+`python -m eval.analyze` prints the summary and saves the charts in `eval/results/`.
 Metrics: success rate (passed), violations, drive minutes, cost, LLM calls, tokens, seconds.
 
 ## Deadlines

@@ -1,0 +1,60 @@
+{
+  "id": "D003",
+  "request_text": "Museum visit, ramen lunch at the Ramen Bar before it closes at 3, groceries, library, and a cafe stop. Home by 7pm, budget $75, driving under 50 minutes.",
+  "start_place_id": "P_home_01",
+  "end_place_id": "P_home_01",
+  "day_start": "10:00",
+  "day_end": "19:00",
+  "budget_usd": 75,
+  "max_drive_min": 50,
+  "difficulty": "hard",
+  "stops": [
+    {
+      "id": "s1",
+      "kind": "flexible",
+      "category": "museum",
+      "window": [
+        "10:00",
+        "14:00"
+      ],
+      "duration_min": 90
+    },
+    {
+      "id": "s2",
+      "kind": "fixed",
+      "place_id": "P_rest_04",
+      "window": [
+        "11:30",
+        "14:15"
+      ],
+      "duration_min": 40
+    },
+    {
+      "id": "s3",
+      "kind": "flexible",
+      "category": "grocery",
+      "duration_min": 30
+    },
+    {
+      "id": "s4",
+      "kind": "flexible",
+      "category": "library",
+      "window": [
+        "14:00",
+        "18:00"
+      ],
+      "duration_min": 45
+    },
+    {
+      "id": "s5",
+      "kind": "flexible",
+      "category": "cafe",
+      "max_price_usd": 6,
+      "window": [
+        "08:00",
+        "16:30"
+      ],
+      "duration_min": 20
+    }
+  ]
+}

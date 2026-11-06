@@ -1,0 +1,16 @@
+id,name,category,lat,lon,price_usd,open,close
+P_home_01,Home (SJSU),home,37.3352,-121.8811,0,00:00,23:59
+P_market_01,DEV Downtown Farmers Market,farmers_market,37.3363,-121.8906,0,09:00,13:00
+P_market_02,DEV Japantown Farmers Market,farmers_market,37.3487,-121.8946,0,08:30,12:30
+P_rest_01,DEV Taqueria Uno,restaurant,37.3300,-121.8850,14,11:00,21:00
+P_rest_02,DEV Pho House,restaurant,37.3415,-121.8862,16,10:30,20:00
+P_rest_03,DEV Pizza Corner,restaurant,37.3260,-121.8790,22,11:00,22:00
+P_rest_04,DEV Ramen Bar,restaurant,37.3495,-121.8955,18,11:30,15:00
+P_cafe_01,DEV Bean Cafe,cafe,37.3340,-121.8870,6,07:00,17:00
+P_cafe_02,DEV Corner Coffee,cafe,37.3470,-121.8920,5,08:00,14:00
+P_library_01,DEV King Library,library,37.3354,-121.8850,0,09:00,20:00
+P_library_02,DEV Branch Library,library,37.3200,-121.8700,0,10:00,18:00
+P_park_01,DEV Plaza Park,park,37.3330,-121.8890,0,06:00,22:00
+P_park_02,DEV Rose Garden,park,37.3320,-121.9280,0,08:00,19:00
+P_museum_01,DEV Tech Museum,museum,37.3310,-121.8900,25,10:00,17:00
+P_grocery_01,DEV Market Grocery,grocery,37.3380,-121.8790,20,08:00,22:00
