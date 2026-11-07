@@ -15,7 +15,7 @@ def load_road_network():
 
     # Location for saving the processed road graph
     project_folder = Path(__file__).resolve().parent.parent
-    graph_file = project_folder / "cache" / "sjsu_roads.graphml"
+    graph_file = project_folder / "cache" / "san_jose_roads_6km.graphml"
 
     # Load the saved graph if it already exists
     if graph_file.exists():
@@ -26,7 +26,7 @@ def load_road_network():
 
     graph = ox.graph_from_point(
         center,
-        dist=1500,
+        dist=6000,
         network_type="drive"
     )
 
