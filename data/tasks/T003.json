@@ -1,0 +1,49 @@
+{
+  "id": "T003",
+  "request_text": "Plan a day with these stops in any suitable order: Visit farmers market between 09:00 and 12:00; Visit restaurant between 11:30 and 14:00 costing at most $20; Visit library between 12:00 and 15:00. Start at 09:00 and return by 19:00. Total budget is $40 and driving must stay under 45 minutes.",
+  "start_place_id": "P_home_01",
+  "end_place_id": "P_home_01",
+  "day_start": "09:00",
+  "day_end": "19:00",
+  "budget_usd": 40.0,
+  "max_drive_min": 45.0,
+  "stops": [
+    {
+      "id": "s1",
+      "kind": "flexible",
+      "place_id": null,
+      "category": "farmers_market",
+      "max_price_usd": null,
+      "window": [
+        "09:00",
+        "12:00"
+      ],
+      "duration_min": 60
+    },
+    {
+      "id": "s2",
+      "kind": "flexible",
+      "place_id": null,
+      "category": "restaurant",
+      "max_price_usd": 20.0,
+      "window": [
+        "11:30",
+        "14:00"
+      ],
+      "duration_min": 45
+    },
+    {
+      "id": "s3",
+      "kind": "flexible",
+      "place_id": null,
+      "category": "library",
+      "max_price_usd": null,
+      "window": [
+        "12:00",
+        "15:00"
+      ],
+      "duration_min": 60
+    }
+  ],
+  "difficulty": "easy"
+}
