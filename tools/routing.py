@@ -3,6 +3,7 @@ import osmnx as ox
 import heapq # module to create the priority queue that A* needs.
 import math
 from pathlib import Path
+from tools.places import get_place
 
 
 # Loads the driving road network around SJSU.
@@ -134,6 +135,9 @@ def astar_search(graph, start, goal):
     # No driving route exists between these intersections
     raise ValueError("No route found between the selected nodes")
 
+# Finds the fastest driving route between two places. Uses their coordinates to locate nearby road intersections.
+# Returns driving time in minutes and optional map coordinates.
+
 def route(a_place_id: str, b_place_id: str, return_path: bool = False):
     """Fastest driving time in MINUTES from place a to place b (directed road graph).
 
@@ -141,4 +145,32 @@ def route(a_place_id: str, b_place_id: str, return_path: bool = False):
     return_path=True  -> (minutes, [(lat, lon), ...]) points along the roads, for David's map
     Uses our own A* (heuristic: straight-line distance / top speed, admissible).
     """
-    raise NotImplementedError("Kami: implement with OSMnx graph + own A*")
+    # Look up both places from our CSV data
+    start_place = get_place(a_place_id)
+    end_place = get_place(b_place_id)
+
+    # Load the cached San Jose road network
+    graph = load_road_network()
+
+    # Find the nearest road intersection for each place
+    start_node = ox.distance.nearest_nodes(
+        graph, X=start_place.lon, Y=start_place.lat
+    )
+    end_node = ox.distance.nearest_nodes(
+        graph, X=end_place.lon, Y=end_place.lat
+    )
+
+    # Find the fastest driving route using our own A*
+    path, travel_seconds = astar_search(graph, start_node, end_node)
+
+    # Convert seconds to minutes
+    travel_minutes = travel_seconds / 60
+
+    if return_path:
+        coordinates = [
+            (graph.nodes[node]["y"], graph.nodes[node]["x"])
+            for node in path
+        ]
+        return travel_minutes, coordinates
+
+    return travel_minutes

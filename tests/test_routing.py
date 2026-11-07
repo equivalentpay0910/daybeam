@@ -5,7 +5,7 @@
 
 import networkx as nx
 import pytest
-
+from tools.routing import route
 from tools.routing import load_road_network, astar_search
 
 
@@ -71,3 +71,27 @@ def test_astar_multiple_routes(road_graph, start_index, goal_index):
     assert our_time == pytest.approx(expected_time, abs=0.001)
     assert path[0] == start
     assert path[-1] == goal
+
+
+# Checks that route() returns the driving time in minutes
+# when the map coordinates are not requested.
+def test_route_returns_minutes():
+    minutes = route("P_home_01", "P_market_01")
+
+    assert isinstance(minutes, float)
+    assert minutes > 0
+
+
+# Checks that route() returns travel time and coordinates
+# for displaying the route in the Streamlit app.
+def test_route_returns_coordinates():
+    minutes, coordinates = route(
+        "P_home_01", "P_market_01", return_path=True
+    )
+
+    assert minutes > 0
+    assert isinstance(coordinates, list)
+    assert len(coordinates) >= 2
+
+    # Every point should contain latitude and longitude
+    assert all(len(point) == 2 for point in coordinates)
