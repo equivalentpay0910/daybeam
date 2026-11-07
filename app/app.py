@@ -3,6 +3,7 @@ from datetime import time
 import hashlib, heapq, pathlib, sys, traceback
 from itertools import count
 from typing import Literal
+from collections import defaultdict, deque
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[1]))  # lets the app import core/, agent/, tools/
 from agent.planner import plan
@@ -15,8 +16,10 @@ from folium.plugins import AntPath, MarkerCluster
 from folium import DivIcon
 import streamlit as st
 from streamlit_folium import st_folium
+import graphviz
 
 def main():
+    """The main method of the class. Can be treated like the blueprint for the webpage itself."""
     initialize_state_if_not_already()
     
     st.set_page_config(page_title="DayBeam", page_icon="☀️", layout="wide")
@@ -33,28 +36,26 @@ def main():
         enable_tab_display()
 
 def initialize_state_if_not_already():
+    """Initializes variables that are never deleted: overridden, maybe, but never deleted."""
     if "initialized" not in st.session_state:
-        planResult = get_default_map_show_iterate()
+        st.session_state["plan_result"] = get_default_map_show_iterate(20)
         st.session_state["display_maps"] = []
         iteration = 0
         finished = False
         while(not finished):
-            finished = iterate_history(planResult, iteration, 1.2, 5)
+            finished = iterate_history(iteration, 1.2, 5)
             iteration += 1
         st.session_state["search_map_stops"] = []
         st.session_state["df"] = pd.read_csv("data/places_sample.csv").dropna()
         st.session_state["active_tab"] = "Display"
-        st.session_state["stopCounter"] = count()
-        st.session_state["taskCounter"] = count()
+        st.session_state["stop_counter"] = count()
         st.session_state["selected_stops"] = {}
-        st.session_state["stopCounter"] = count()
-        st.session_state["selected_stops"] = {}
-        st.session_state["initialized"] = True
         st.session_state["time_d_e"] = time(0, 0)
         st.session_state["time_d_l"] = time(23, 59)
+        st.session_state["initialized"] = True
 
 def enable_tab_create():
-    """"""
+    """Displays the create tab"""
     request = st.text_area("What do you want to do?",
                         "Farmers market before noon, lunch under $20, library by 3, home by 6.")
     
@@ -85,25 +86,24 @@ def enable_tab_create():
             # call method from Kami to clean the task here
 
             planResult = plan(task=task, method=method, seed=seed, beam_width=beamWidth)
-            
+            st.session_state["planResult"] = planResult
             st.session_state["display_maps"] = []
             iteration = 0
             finished = False
             while(not finished):
-                finished = iterate_history(planResult, iteration, 1.2, 5)
+                finished = iterate_history(iteration, 1.2, 5)
                 iteration += 1
         
         except Exception as e:
             st.error(e)
             traceback.print_exc()
-
-    planMapHolder = st.empty()
-    with planMapHolder:
-        st_folium(build_stops_map(list(st.session_state["selected_stops"].values()), start, end), 
-                width=900, height=500, 
-                key=f"daybeam_search_map", 
-                returned_objects=[]
-        )
+    
+    st.subheader("Stops Map")
+    st_folium(build_stops_map(list(st.session_state["selected_stops"].values()), start, end), 
+            width=900, height=500, 
+            key=f"daybeam_search_map", 
+            returned_objects=[]
+    )
 
 def enable_tab_display():
     """Displays the display tab"""
@@ -125,13 +125,17 @@ def enable_tab_display():
             case _:
                 currMap = folium.Map(location=[37.3352, -121.8811], zoom_start=14)
 
-        planMapHolder = st.empty()
-        with planMapHolder:
-            st_folium(currMap, 
-                    width=900, height=500, 
-                    key=f"daybeam_display_map_{mapSlider}", 
-                    returned_objects=[]
-            )
+        st.subheader("Route Map")
+        st_folium(currMap, 
+                width=900, height=500, 
+                key=f"daybeam_display_map_{mapSlider}", 
+                returned_objects=[]
+        )
+
+        st.subheader("Search Tree")
+        if "plan_result" in st.session_state and st.session_state["plan_result"].search_log:
+            tree_graph = build_search_tree_graph(st.session_state["plan_result"])
+            st.graphviz_chart(tree_graph, width='content')
     except Exception as e:
         st.error(e)
         traceback.print_exc()
@@ -190,7 +194,7 @@ def make_budget_and_drive():
         )
     with colDrive:
         drive = st.number_input(
-            "Enter driving time",
+            "Enter driving time (minutes)",
             min_value=0.0,
             step=1.0,
             key="drive"
@@ -296,7 +300,7 @@ def add_stop(kind : Literal["fixed", "flexible"], inputKey : str):
     """Creates a stop and adds it to the selected stops dictionary"""
     try:
         if st.session_state[inputKey]:
-            stopId = f"s{next(st.session_state['stopCounter'])}"
+            stopId = f"s{next(st.session_state['stop_counter'])}"
             windowStrings = (st.session_state["time_d_e"].strftime("%H:%M"), 
                            st.session_state["time_d_l"].strftime("%H:%M"))
             if kind == "flexible":
@@ -355,28 +359,70 @@ def calculate_index(iteration : int, growthBase : float, batchSize : int):
     """Calculates the next index based on an exponential sum."""
     return round((1-pow(growthBase, iteration+1))/(1-growthBase))+(batchSize*(iteration))-1
 
-def get_default_map_show_iterate():
+def get_default_map_show_iterate(size : int = 20):
     """Generates a randomized map using the four placeholder ids."""
     stops : list[PlannedStop] = []
     stopsCategory = [PlannedStop(stop_id="-1", place_id="P_home_01"),
                     PlannedStop(stop_id="-1", place_id="P_market_01"),
                     PlannedStop(stop_id="-1", place_id="P_library_01"), 
                     PlannedStop(stop_id="-1", place_id="P_rest_01")]
-    stops = stops + list(np.random.choice(stopsCategory, 30))
+    stops = stops + list(np.random.choice(stopsCategory, size))
     rng = np.random.default_rng()
-    scores = rng.integers(low=0, high=10, size=30)
+    scores = rng.integers(low=0, high=10, size=size)
     plan = Plan(task_id="-1", stops=stops) #task_id is -1 because this is filler data and the app does not need to read the task id after the agent has already made a plan
     planResult = PlanResult(plan=plan, method="one_shot")
-    for i in range(30):
-        for j in range(round(pow(1.2, i+1))):
-            planResult.search_log.append(SearchNode(node_id=-1, depth=i, 
-                                                    partial_plan=[stops[0]]+[stop for stop in np.random.choice(stopsCategory, size=i)], 
-                                                    score=sum(scores[:i+1])+rng.integers(low=0, high=10)))
-        planResult.search_log.append(SearchNode(node_id=-1, depth=i, partial_plan=stops[:i+1], score=sum(scores[:i+1])))
+    last = 0 # cannot be none because last references curr+2
+    counter = count(start=1)
+    num = next(counter)
+    planResult.search_log.append(SearchNode(node_id=num, depth=0, 
+                partial_plan=[], 
+                score=0, kept = True))
+
+    parentDict = dict()
+    
+    for i in range(size):
+        curr = next(counter)
+        if i>0:
+            parents = rng.integers(low=last, high=curr, size=round(pow(1.3, i+1)))
+            keptList = np.random.choice([True, False], size=round(pow(1.3, i+1)), p=[0.8, 0.2])
+            for j in range(round(pow(1.3, i+1))):
+                if parentDict[parents[j]].kept:
+                    kept = keptList[j]
+                else:
+                    kept = False
+                num = next(counter)
+                node = SearchNode(node_id=num, depth=i+1, 
+                                partial_plan=[stops[0]]+[stop for stop in np.random.choice(stopsCategory, size=i+1)], 
+                                score=sum(scores[:i+1])+rng.integers(low=0, high=10),
+                                parent_id=parents[j], kept=kept)
+                planResult.search_log.append(node)
+                parentDict[num] = node
+
+            num = next(counter)
+            node = SearchNode(node_id=num, depth=i+1, partial_plan=stops[:i+1], score=sum(scores[:i+1]), parent_id=curr-1)
+            planResult.search_log.append(node)
+            parentDict[num] = node
+        else:
+            keptList = np.random.choice([True, False], size=round(pow(1.3, i+1)))
+            for j in range(round(pow(1.3, i+1))):
+                num = next(counter)
+                node = SearchNode(node_id=num, depth=i+1, 
+                                    partial_plan=[stops[0]]+[stop for stop in np.random.choice(stopsCategory, size=i+1)], 
+                                    score=sum(scores[:i+1])+rng.integers(low=0, high=10),
+                                    parent_id=1, kept=keptList[j])
+                planResult.search_log.append(node)
+                parentDict[num] = node
+
+            num = next(counter)
+            node = SearchNode(node_id=num, depth=i+1, partial_plan=stops[:i+1], score=sum(scores[:i+1]), parent_id=1)
+            planResult.search_log.append(node)
+            parentDict[num] = node
+        last = curr+1
     return planResult
 
-def iterate_history(planResult : PlanResult, iteration : int, growth_base : float, batch_size : int):
+def iterate_history(iteration : int, growth_base : float, batch_size : int):
     """Performs one iteration on search history. Exponential indexing to prevent drawing too many maps. Returns False if there can be another iteration and True if all iterations are done."""
+    planResult = st.session_state["plan_result"]
     startingIndex = calculate_index(iteration, growth_base, batch_size)
     searchLog : list[SearchNode] = planResult.search_log
     if len(searchLog)-1 < startingIndex:
@@ -603,6 +649,64 @@ def build_map(markerCluster : MarkerCluster, coordinatePath : list[tuple[int]], 
         markerCluster.add_to(m)
         m.fit_bounds(coordinatePath)
     return m
+
+def build_search_tree_graph(plan_result: PlanResult):
+    """Creates a search tree, clustering pruned nodes."""
+    graph = graphviz.Digraph(
+        graph_attr={'rankdir': 'LR'}, 
+        node_attr={'shape': 'box', 'style': 'filled', 'fontname': 'Helvetica'}
+    )
+    
+    parentDict = dict()
+    nodeIds = {node.node_id for node in plan_result.search_log}
+    
+    for node in plan_result.search_log:
+        if node.parent_id is not None and node.parent_id not in nodeIds:
+            continue
+        if node.parent_id not in parentDict:
+            parentDict[node.parent_id] = {True: [], False: []}
+        parentDict[node.parent_id][node.kept].append(node)
+        
+    queue = deque([None]) 
+
+    while queue:
+        currentParent = queue.popleft()
+
+        if currentParent not in parentDict:
+            continue
+
+        for node in parentDict[currentParent][True]:
+            label = f"Node: {node.node_id}\nDepth: {node.depth}\nStops: {len(node.partial_plan)}"
+            graph.node(str(node.node_id), label=label, fillcolor="lightblue", fontcolor="black")
+
+            if currentParent is not None:
+                graph.edge(str(currentParent), str(node.node_id))
+
+            queue.append(node.node_id)
+
+        unkept = parentDict[currentParent][False]
+        if len(parentDict[currentParent][False]) > 3:
+            parentDict[currentParent][False].sort(key=lambda x: (x.score is None, x.score))
+            unkept = parentDict[currentParent][False][:2]
+            left = len(parentDict[currentParent][False])-2
+            graph.node(
+                f"cluster{currentParent}", 
+                label=f"+{left}\npruned", 
+                shape="circle", 
+                style="filled,dashed", 
+                fillcolor="whitesmoke", 
+                fontcolor="grey"
+            )
+            graph.edge(str(currentParent), f"cluster{currentParent}", style="dashed", color="grey")
+
+        for node in unkept:
+            label = f"Node: {node.node_id}\nDepth: {node.depth}\nStops: {len(node.partial_plan)}"
+            graph.node(str(node.node_id), label=label, fillcolor="lightgrey", fontcolor="grey")
+
+            if currentParent is not None:
+                graph.edge(str(currentParent), str(node.node_id))
+            
+    return graph
 
 def hex(text : str):
     """Converts string to a sha256 hash and turns the hash into values of red, green, and blue for hexadecimal formatting"""
