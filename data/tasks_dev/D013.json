@@ -1,0 +1,51 @@
+{
+  "id": "D013",
+  "request_text": "Plan my day starting at 08:00: a coffee stop for 60 min; a park walk for 60 min; groceries for 60 min; the library (arrive 13:00 to 15:30) for 60 min; a farmers market (arrive 08:00 to 10:30) for 30 min. Home by 14:45, spend at most $32, and drive at most 10 minutes total.",
+  "start_place_id": "P_home_01",
+  "end_place_id": "P_home_01",
+  "day_start": "08:00",
+  "day_end": "14:45",
+  "budget_usd": 32,
+  "max_drive_min": 10,
+  "stops": [
+    {
+      "id": "s1",
+      "kind": "flexible",
+      "category": "cafe",
+      "duration_min": 60
+    },
+    {
+      "id": "s2",
+      "kind": "flexible",
+      "category": "park",
+      "duration_min": 60
+    },
+    {
+      "id": "s3",
+      "kind": "flexible",
+      "category": "grocery",
+      "duration_min": 60
+    },
+    {
+      "id": "s4",
+      "kind": "flexible",
+      "category": "library",
+      "duration_min": 60,
+      "window": [
+        "13:00",
+        "15:30"
+      ]
+    },
+    {
+      "id": "s5",
+      "kind": "flexible",
+      "category": "farmers_market",
+      "duration_min": 30,
+      "window": [
+        "08:00",
+        "10:30"
+      ]
+    }
+  ],
+  "difficulty": "hard"
+}

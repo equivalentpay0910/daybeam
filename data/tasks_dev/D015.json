@@ -1,0 +1,41 @@
+{
+  "id": "D015",
+  "request_text": "Plan my day starting at 09:00: a park walk for 30 min; the Burrito Spot (arrive 11:30 to 13:30) for 30 min; a museum for 45 min; the library for 20 min. Home by 13:30, spend at most $32, and drive at most 30 minutes total.",
+  "start_place_id": "P_home_01",
+  "end_place_id": "P_home_01",
+  "day_start": "09:00",
+  "day_end": "13:30",
+  "budget_usd": 32,
+  "max_drive_min": 30,
+  "stops": [
+    {
+      "id": "s1",
+      "kind": "flexible",
+      "category": "park",
+      "duration_min": 30
+    },
+    {
+      "id": "s2",
+      "kind": "fixed",
+      "duration_min": 30,
+      "window": [
+        "11:30",
+        "13:30"
+      ],
+      "place_id": "P_rest_06"
+    },
+    {
+      "id": "s3",
+      "kind": "flexible",
+      "category": "museum",
+      "duration_min": 45
+    },
+    {
+      "id": "s4",
+      "kind": "flexible",
+      "category": "library",
+      "duration_min": 20
+    }
+  ],
+  "difficulty": "medium"
+}

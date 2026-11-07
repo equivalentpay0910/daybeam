@@ -1,0 +1,45 @@
+{
+  "id": "D011",
+  "request_text": "Plan my day starting at 08:30: a coffee stop for 45 min; groceries for 45 min; a farmers market (arrive 08:30 to 10:30) for 30 min; Example Taqueria (arrive 11:30 to 13:30) for 60 min. Home by 13:15, spend at most $44, and drive at most 11 minutes total.",
+  "start_place_id": "P_home_01",
+  "end_place_id": "P_home_01",
+  "day_start": "08:30",
+  "day_end": "13:15",
+  "budget_usd": 44,
+  "max_drive_min": 11,
+  "stops": [
+    {
+      "id": "s1",
+      "kind": "flexible",
+      "category": "cafe",
+      "duration_min": 45
+    },
+    {
+      "id": "s2",
+      "kind": "flexible",
+      "category": "grocery",
+      "duration_min": 45
+    },
+    {
+      "id": "s3",
+      "kind": "flexible",
+      "category": "farmers_market",
+      "duration_min": 30,
+      "window": [
+        "08:30",
+        "10:30"
+      ]
+    },
+    {
+      "id": "s4",
+      "kind": "fixed",
+      "duration_min": 60,
+      "window": [
+        "11:30",
+        "13:30"
+      ],
+      "place_id": "P_rest_01"
+    }
+  ],
+  "difficulty": "hard"
+}

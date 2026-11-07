@@ -1,0 +1,60 @@
+{
+  "id": "D004",
+  "request_text": "Plan my day starting at 08:00: lunch under $20 (arrive 11:30 to 13:00) for 45 min; the library (arrive 13:00 to 15:30) for 30 min; a farmers market (arrive 08:00 to 11:00) for 60 min; a park walk for 20 min; the Bean Cafe (arrive 08:00 to 10:00) for 30 min. Home by 14:15, spend at most $22, and drive at most 11 minutes total.",
+  "start_place_id": "P_home_01",
+  "end_place_id": "P_home_01",
+  "day_start": "08:00",
+  "day_end": "14:15",
+  "budget_usd": 22,
+  "max_drive_min": 11,
+  "stops": [
+    {
+      "id": "s1",
+      "kind": "flexible",
+      "category": "restaurant",
+      "duration_min": 45,
+      "max_price_usd": 20,
+      "window": [
+        "11:30",
+        "13:00"
+      ]
+    },
+    {
+      "id": "s2",
+      "kind": "flexible",
+      "category": "library",
+      "duration_min": 30,
+      "window": [
+        "13:00",
+        "15:30"
+      ]
+    },
+    {
+      "id": "s3",
+      "kind": "flexible",
+      "category": "farmers_market",
+      "duration_min": 60,
+      "window": [
+        "08:00",
+        "11:00"
+      ]
+    },
+    {
+      "id": "s4",
+      "kind": "flexible",
+      "category": "park",
+      "duration_min": 20
+    },
+    {
+      "id": "s5",
+      "kind": "fixed",
+      "duration_min": 30,
+      "window": [
+        "08:00",
+        "10:00"
+      ],
+      "place_id": "P_cafe_01"
+    }
+  ],
+  "difficulty": "hard"
+}

@@ -1,0 +1,56 @@
+{
+  "id": "D012",
+  "request_text": "Plan my day starting at 08:00: a farmers market (arrive 08:00 to 11:00) for 20 min; lunch under $12 (arrive 11:30 to 13:00) for 20 min; groceries for 30 min; the Tech Museum for 20 min; the library (arrive 13:00 to 15:30) for 20 min. Home by 14:30, spend at most $62, and drive at most 33 minutes total.",
+  "start_place_id": "P_home_01",
+  "end_place_id": "P_home_01",
+  "day_start": "08:00",
+  "day_end": "14:30",
+  "budget_usd": 62,
+  "max_drive_min": 33,
+  "stops": [
+    {
+      "id": "s1",
+      "kind": "flexible",
+      "category": "farmers_market",
+      "duration_min": 20,
+      "window": [
+        "08:00",
+        "11:00"
+      ]
+    },
+    {
+      "id": "s2",
+      "kind": "flexible",
+      "category": "restaurant",
+      "duration_min": 20,
+      "max_price_usd": 12,
+      "window": [
+        "11:30",
+        "13:00"
+      ]
+    },
+    {
+      "id": "s3",
+      "kind": "flexible",
+      "category": "grocery",
+      "duration_min": 30
+    },
+    {
+      "id": "s4",
+      "kind": "fixed",
+      "duration_min": 20,
+      "place_id": "P_museum_01"
+    },
+    {
+      "id": "s5",
+      "kind": "flexible",
+      "category": "library",
+      "duration_min": 20,
+      "window": [
+        "13:00",
+        "15:30"
+      ]
+    }
+  ],
+  "difficulty": "hard"
+}

@@ -2,6 +2,7 @@
 import osmnx as ox
 import heapq # module to create the priority queue that A* needs.
 import math
+from functools import lru_cache
 from pathlib import Path
 from tools.places import get_place
 
@@ -10,12 +11,13 @@ from tools.places import get_place
 # Reuses a saved graph when available to avoid repeated downloads.
 # Adds estimated speeds and travel times for A* routing.
 
+@lru_cache(maxsize=1)  # load the map once per session, not on every route call
 def load_road_network():
     ox.settings.use_cache = True
 
     # Location for saving the processed road graph
     project_folder = Path(__file__).resolve().parent.parent
-    graph_file = project_folder / "cache" / "san_jose_roads_6km.graphml"
+    graph_file = project_folder / "cache" / "san_jose_roads_10km.graphml"
 
     # Load the saved graph if it already exists
     if graph_file.exists():
@@ -26,7 +28,7 @@ def load_road_network():
 
     graph = ox.graph_from_point(
         center,
-        dist=6000,
+        dist=10500,  # farthest place in places.csv is about 10 km from SJSU
         network_type="drive"
     )
 
@@ -138,6 +140,7 @@ def astar_search(graph, start, goal):
 # Finds the fastest driving route between two places. Uses their coordinates to locate nearby road intersections.
 # Returns driving time in minutes and optional map coordinates.
 
+@lru_cache(maxsize=None)  # same two places always give the same answer, so remember it
 def route(a_place_id: str, b_place_id: str, return_path: bool = False):
     """Fastest driving time in MINUTES from place a to place b (directed road graph).
 

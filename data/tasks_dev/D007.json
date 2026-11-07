@@ -1,0 +1,52 @@
+{
+  "id": "D007",
+  "request_text": "Plan my day starting at 09:00: a coffee stop for 45 min; lunch under $20 (arrive 11:30 to 13:30) for 45 min; the Tech Museum for 45 min; a park walk for 20 min; a farmers market (arrive 09:00 to 11:00) for 20 min. Home by 13:00, spend at most $49, and drive at most 11 minutes total.",
+  "start_place_id": "P_home_01",
+  "end_place_id": "P_home_01",
+  "day_start": "09:00",
+  "day_end": "13:00",
+  "budget_usd": 49,
+  "max_drive_min": 11,
+  "stops": [
+    {
+      "id": "s1",
+      "kind": "flexible",
+      "category": "cafe",
+      "duration_min": 45
+    },
+    {
+      "id": "s2",
+      "kind": "flexible",
+      "category": "restaurant",
+      "duration_min": 45,
+      "max_price_usd": 20,
+      "window": [
+        "11:30",
+        "13:30"
+      ]
+    },
+    {
+      "id": "s3",
+      "kind": "fixed",
+      "duration_min": 45,
+      "place_id": "P_museum_01"
+    },
+    {
+      "id": "s4",
+      "kind": "flexible",
+      "category": "park",
+      "duration_min": 20
+    },
+    {
+      "id": "s5",
+      "kind": "flexible",
+      "category": "farmers_market",
+      "duration_min": 20,
+      "window": [
+        "09:00",
+        "11:00"
+      ]
+    }
+  ],
+  "difficulty": "hard"
+}

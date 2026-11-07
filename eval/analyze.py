@@ -51,7 +51,7 @@ def main(path="eval/results/results.csv"):
     print(show.round(2).to_string())
 
     by_diff = df.groupby(["difficulty", "method"])["passed"].mean().unstack().reindex(
-        index=[d for d in ["easy", "medium", "hard"] if d in df["difficulty"].unique()])
+        index=[d for d in ["easy", "medium", "hard", "tight"] if d in df["difficulty"].unique()])
     print("\n=== Success rate by difficulty ===")
     print((by_diff * 100).round(0).to_string())
 

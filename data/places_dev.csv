@@ -14,3 +14,14 @@ P_park_01,DEV Plaza Park,park,37.3330,-121.8890,0,06:00,22:00
 P_park_02,DEV Rose Garden,park,37.3320,-121.9280,0,08:00,19:00
 P_museum_01,DEV Tech Museum,museum,37.3310,-121.8900,25,10:00,17:00
 P_grocery_01,DEV Market Grocery,grocery,37.3380,-121.8790,20,08:00,22:00
+P_market_03,DEV Berryessa Farmers Market,farmers_market,37.3860,-121.8600,0,08:00,12:00
+P_rest_05,DEV Noodle Stand,restaurant,37.3700,-121.9150,9,11:00,14:30
+P_rest_06,DEV Burrito Spot,restaurant,37.3050,-121.8550,11,10:00,16:00
+P_rest_07,DEV Sushi Place,restaurant,37.3450,-121.8800,28,11:30,21:00
+P_cafe_03,DEV Early Bird Cafe,cafe,37.3600,-121.9000,4,06:30,10:00
+P_cafe_04,DEV Study Cafe,cafe,37.3250,-121.8650,7,09:00,21:00
+P_library_03,DEV Eastside Library,library,37.3550,-121.8350,0,12:00,20:00
+P_park_03,DEV Alum Rock Park,park,37.3970,-121.8000,0,08:00,17:00
+P_park_04,DEV Guadalupe Park,park,37.3450,-121.9000,0,06:00,21:00
+P_museum_02,DEV Art Museum,museum,37.3330,-121.8890,15,11:00,16:00
+P_grocery_02,DEV Corner Grocery,grocery,37.3600,-121.8700,12,07:00,20:00

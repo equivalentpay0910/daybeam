@@ -1,0 +1,56 @@
+{
+  "id": "D014",
+  "request_text": "Plan my day starting at 09:00: the library (arrive 13:00 to 15:30) for 45 min; the Art Museum for 20 min; lunch under $20 (arrive 11:30 to 13:00) for 45 min; a farmers market (arrive 09:00 to 11:00) for 45 min; groceries for 30 min. Home by 14:30, spend at most $55, and drive at most 12 minutes total.",
+  "start_place_id": "P_home_01",
+  "end_place_id": "P_home_01",
+  "day_start": "09:00",
+  "day_end": "14:30",
+  "budget_usd": 55,
+  "max_drive_min": 12,
+  "stops": [
+    {
+      "id": "s1",
+      "kind": "flexible",
+      "category": "library",
+      "duration_min": 45,
+      "window": [
+        "13:00",
+        "15:30"
+      ]
+    },
+    {
+      "id": "s2",
+      "kind": "fixed",
+      "duration_min": 20,
+      "place_id": "P_museum_02"
+    },
+    {
+      "id": "s3",
+      "kind": "flexible",
+      "category": "restaurant",
+      "duration_min": 45,
+      "max_price_usd": 20,
+      "window": [
+        "11:30",
+        "13:00"
+      ]
+    },
+    {
+      "id": "s4",
+      "kind": "flexible",
+      "category": "farmers_market",
+      "duration_min": 45,
+      "window": [
+        "09:00",
+        "11:00"
+      ]
+    },
+    {
+      "id": "s5",
+      "kind": "flexible",
+      "category": "grocery",
+      "duration_min": 30
+    }
+  ],
+  "difficulty": "hard"
+}
