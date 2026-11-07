@@ -349,7 +349,7 @@ def validate_time(key : str):
 
 def update_duration(key : str, stopId : str):
     """Connects the duration field to the stop request duration variable"""
-    st.session_state["selected_stops"][stopId].duration = st.session_state[key]
+    st.session_state["selected_stops"][stopId].duration_min = st.session_state[key]
 
 def calculate_index(iteration : int, growthBase : float, batchSize : int):
     """Calculates the next index based on an exponential sum."""
