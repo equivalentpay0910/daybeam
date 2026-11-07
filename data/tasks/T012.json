@@ -1,0 +1,58 @@
+{
+  "id": "T012",
+  "request_text": "Coffee first thing, the Japantown farmers market, lunch under $18, a park walk, then home by 4pm. Spend under $25, drive under 40 minutes.",
+  "start_place_id": "P_home_01",
+  "end_place_id": "P_home_01",
+  "day_start": "08:30",
+  "day_end": "16:00",
+  "budget_usd": 25.0,
+  "max_drive_min": 40.0,
+  "stops": [
+    {
+      "id": "s1",
+      "kind": "flexible",
+      "place_id": null,
+      "category": "cafe",
+      "max_price_usd": null,
+      "window": [
+        "08:30",
+        "10:00"
+      ],
+      "duration_min": 20
+    },
+    {
+      "id": "s2",
+      "kind": "fixed",
+      "place_id": "P_market_02",
+      "category": null,
+      "max_price_usd": null,
+      "window": [
+        "09:00",
+        "12:00"
+      ],
+      "duration_min": 45
+    },
+    {
+      "id": "s3",
+      "kind": "flexible",
+      "place_id": null,
+      "category": "restaurant",
+      "max_price_usd": 18.0,
+      "window": [
+        "11:30",
+        "13:30"
+      ],
+      "duration_min": 40
+    },
+    {
+      "id": "s4",
+      "kind": "flexible",
+      "place_id": null,
+      "category": "park",
+      "max_price_usd": null,
+      "window": null,
+      "duration_min": 45
+    }
+  ],
+  "difficulty": "medium"
+}

@@ -1,0 +1,58 @@
+{
+  "id": "T018",
+  "request_text": "Plan a day with these stops in any suitable order: Visit cafe between 08:30 and 10:00; Visit P_market_02 between 09:00 and 12:00; Visit restaurant between 11:30 and 13:30 costing at most $20; Visit P_park_01. Start at 08:30 and return by 17:00. Total budget is $35 and driving must stay under 45 minutes.",
+  "start_place_id": "P_home_01",
+  "end_place_id": "P_home_01",
+  "day_start": "08:30",
+  "day_end": "17:00",
+  "budget_usd": 35.0,
+  "max_drive_min": 45.0,
+  "stops": [
+    {
+      "id": "s1",
+      "kind": "flexible",
+      "place_id": null,
+      "category": "cafe",
+      "max_price_usd": null,
+      "window": [
+        "08:30",
+        "10:00"
+      ],
+      "duration_min": 20
+    },
+    {
+      "id": "s2",
+      "kind": "fixed",
+      "place_id": "P_market_02",
+      "category": null,
+      "max_price_usd": null,
+      "window": [
+        "09:00",
+        "12:00"
+      ],
+      "duration_min": 45
+    },
+    {
+      "id": "s3",
+      "kind": "flexible",
+      "place_id": null,
+      "category": "restaurant",
+      "max_price_usd": 20.0,
+      "window": [
+        "11:30",
+        "13:30"
+      ],
+      "duration_min": 40
+    },
+    {
+      "id": "s4",
+      "kind": "fixed",
+      "place_id": "P_park_01",
+      "category": null,
+      "max_price_usd": null,
+      "window": null,
+      "duration_min": 45
+    }
+  ],
+  "difficulty": "medium"
+}

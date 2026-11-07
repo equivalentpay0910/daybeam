@@ -1,0 +1,70 @@
+{
+  "id": "T027",
+  "request_text": "Plan a day with these stops in any suitable order: Visit museum between 10:00 and 14:00; Visit P_rest_04 between 11:30 and 14:15; Visit grocery; Visit library between 14:00 and 18:00; Visit cafe between 08:00 and 16:30 costing at most $6. Start at 10:00 and return by 20:00. Total budget is $85 and driving must stay under 60 minutes.",
+  "start_place_id": "P_home_01",
+  "end_place_id": "P_home_01",
+  "day_start": "10:00",
+  "day_end": "20:00",
+  "budget_usd": 85.0,
+  "max_drive_min": 60.0,
+  "stops": [
+    {
+      "id": "s1",
+      "kind": "flexible",
+      "place_id": null,
+      "category": "museum",
+      "max_price_usd": null,
+      "window": [
+        "10:00",
+        "14:00"
+      ],
+      "duration_min": 105
+    },
+    {
+      "id": "s2",
+      "kind": "fixed",
+      "place_id": "P_rest_04",
+      "category": null,
+      "max_price_usd": null,
+      "window": [
+        "11:30",
+        "14:15"
+      ],
+      "duration_min": 40
+    },
+    {
+      "id": "s3",
+      "kind": "flexible",
+      "place_id": null,
+      "category": "grocery",
+      "max_price_usd": null,
+      "window": null,
+      "duration_min": 30
+    },
+    {
+      "id": "s4",
+      "kind": "flexible",
+      "place_id": null,
+      "category": "library",
+      "max_price_usd": null,
+      "window": [
+        "14:00",
+        "18:00"
+      ],
+      "duration_min": 45
+    },
+    {
+      "id": "s5",
+      "kind": "flexible",
+      "place_id": null,
+      "category": "cafe",
+      "max_price_usd": 6.0,
+      "window": [
+        "08:00",
+        "16:30"
+      ],
+      "duration_min": 20
+    }
+  ],
+  "difficulty": "hard"
+}
