@@ -38,6 +38,8 @@ def main():
 def initialize_state_if_not_already():
     """Initializes variables that are never deleted: overridden, maybe, but never deleted."""
     if "initialized" not in st.session_state:
+        st.session_state["search_map_stops"] = []
+        st.session_state["df"] = pd.read_csv("data/places.csv").dropna()
         st.session_state["plan_result"] = get_default_map_show_iterate(20)
         st.session_state["display_maps"] = []
         iteration = 0
@@ -45,8 +47,6 @@ def initialize_state_if_not_already():
         while(not finished):
             finished = iterate_history(iteration, 1.2, 5)
             iteration += 1
-        st.session_state["search_map_stops"] = []
-        st.session_state["df"] = pd.read_csv("data/places_sample.csv").dropna()
         st.session_state["active_tab"] = "Display"
         st.session_state["stop_counter"] = count()
         st.session_state["selected_stops"] = {}
@@ -278,12 +278,24 @@ def generate_stop_forms():
                                                 key=f"time_l_{selected_stop_id}",
                                                 on_change=update_order_time, 
                                                 args=(f"time_e_{selected_stop_id}", f"time_l_{selected_stop_id}", selected_stop_id))
-                st.number_input("Duration (minutes)", 
-                                        min_value=0, 
-                                        step=5, 
-                                        key=f"dur_{selected_stop_id}",
-                                        on_change=update_duration, 
-                                        args=(f"dur_{selected_stop_id}", selected_stop_id))
+                colDur, colBud = st.columns(2)
+                with colDur:
+                    st.number_input("Duration (minutes)", 
+                                            min_value=0, 
+                                            step=5, 
+                                            key=f"dur_{selected_stop_id}",
+                                            on_change=update_duration, 
+                                            args=(f"dur_{selected_stop_id}", selected_stop_id))
+                with colBud:
+                    st.number_input(
+                        "Enter budget (USD)",
+                        min_value=0.0,
+                        step=0.01,
+                        format="%.2f",
+                        key=f"budget_{selected_stop_id}",
+                        on_change=update_budget,
+                        args=(f"dur_{selected_stop_id}", selected_stop_id)
+                    )
                 if st.button("Remove stop",
                     key=f"button_remove_{selected_stop_id}"):
                     del st.session_state["selected_stops"][selected_stop_id]
@@ -355,6 +367,10 @@ def update_duration(key : str, stopId : str):
     """Connects the duration field to the stop request duration variable"""
     st.session_state["selected_stops"][stopId].duration_min = st.session_state[key]
 
+def update_budget(key : str, stopId : str):
+    """Connects the budget field to the stop request budget variable"""
+    st.session_state["selected_stops"][stopId].max_price_usd = st.session_state[key]
+
 def calculate_index(iteration : int, growthBase : float, batchSize : int):
     """Calculates the next index based on an exponential sum."""
     return round((1-pow(growthBase, iteration+1))/(1-growthBase))+(batchSize*(iteration))-1
@@ -362,10 +378,7 @@ def calculate_index(iteration : int, growthBase : float, batchSize : int):
 def get_default_map_show_iterate(size : int = 20):
     """Generates a randomized map using the four placeholder ids."""
     stops : list[PlannedStop] = []
-    stopsCategory = [PlannedStop(stop_id="-1", place_id="P_home_01"),
-                    PlannedStop(stop_id="-1", place_id="P_market_01"),
-                    PlannedStop(stop_id="-1", place_id="P_library_01"), 
-                    PlannedStop(stop_id="-1", place_id="P_rest_01")]
+    stopsCategory = [PlannedStop(stop_id="-1", place_id=id) for id in st.session_state["df"]["id"].tolist()]
     stops = stops + list(np.random.choice(stopsCategory, size))
     rng = np.random.default_rng()
     scores = rng.integers(low=0, high=10, size=size)
@@ -455,6 +468,8 @@ def build_potential_routes_map(routes : list[SearchNode]):
     for route, color in zip(routes, ["red", "blue", "green", "orange", "yellow"]):
         try:
             routeDict = build_route(route.partial_plan, color)
+            if routeDict is None:
+                continue
             lines.append(routeDict["line"])
             if minLat: # if minLat is not none, then there is at least one coordinate, so everything else is not None
                 minLat = min(minLat, routeDict["minLat"])
@@ -485,6 +500,8 @@ def build_route(plannedStops : list[PlannedStop], color : str):
         check_place(placeId, coordinatePath)
     lat = [coordinate[0] for coordinate in coordinatePath]
     lon = [coordinate[1] for coordinate in coordinatePath]
+    if not coordinatePath or len(coordinatePath)==0:
+        return None
     return {"line":folium.PolyLine(
         locations=coordinatePath,
         color=color,
@@ -519,7 +536,7 @@ def build_stops_map(stops : list[StopRequest], start : str, end : str):
         for stop in stops:
             check_stop(stop, coordinatePath, counter=counter, markerCluster=markerCluster)
         check_special_place(coordinatePath, "★", markerCluster, "#FF919E", st.session_state["select_end"], "Ending location")
-        return build_map(markerCluster, coordinatePath, False)
+        return build_map(markerCluster, coordinatePath, route=False)
     except Exception as e:
         st.error(e)
         traceback.print_exc()
@@ -531,8 +548,8 @@ def check_place(placeId : str, coordinatePath : list[tuple[int]], counter : coun
         for i, row in filteredDf.iterrows():
             color = hex(row.category)
             coordinates = (row["lat"], row["lon"])
-            markerHtml = marker_html(color, str(next(counter)))
             if markerCluster and counter:
+                markerHtml = marker_html(color, str(next(counter)))
                 folium.Marker(coordinates, 
                                 tooltip=row["name"],
                                 sticky=True,
@@ -640,7 +657,7 @@ def build_map(markerCluster : MarkerCluster, coordinatePath : list[tuple[int]], 
     m = folium.Map(location=[37.3352, -121.8811], zoom_start=14)  # SJSU
     if len(coordinatePath) > 0:
         m = folium.Map()
-        if route:
+        if route and coordinatePath and len(coordinatePath)>0:
             AntPath(locations=coordinatePath,
             color="#527DFF",
             pulse_color="#CFE2FF",
