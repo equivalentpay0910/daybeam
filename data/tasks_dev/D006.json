@@ -1,9 +1,9 @@
 {
   "id": "D006",
-  "request_text": "Plan my day starting at 08:30: a farmers market (arrive 08:30 to 10:30) for 20 min; a park walk for 20 min; a museum (arrive 13:00 to 15:30) for 30 min; lunch under $15 (arrive 11:30 to 13:30) for 60 min. Home by 14:15, spend at most $33, and drive at most 11 minutes total.",
+  "request_text": "Plan my day starting at 08:45: a farmers market (arrive 08:30 to 10:30) for 20 min; a park walk for 20 min; a museum (arrive 13:00 to 15:30) for 30 min; lunch under $15 (arrive 11:30 to 13:30) for 60 min. Home by 14:15, spend at most $33, and drive at most 11 minutes total.",
   "start_place_id": "P_home_01",
   "end_place_id": "P_home_01",
-  "day_start": "08:30",
+  "day_start": "08:45",
   "day_end": "14:15",
   "budget_usd": 33,
   "max_drive_min": 11,

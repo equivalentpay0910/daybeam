@@ -7,6 +7,7 @@ import sys
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import os
 import pandas as pd
 
 ORANGE, NAVY, GRAY = "#E8590C", "#1E3A64", "#9AA5B1"
@@ -36,6 +37,14 @@ def main(path="eval/results/results.csv"):
     if api_fail.any():
         print(f"Skipping {int(api_fail.sum())} runs that failed because of Gemini limits (re-run them later; finished runs are cached).")
     df = df[~api_fail].copy()
+    # Leave out tasks that NO plan can pass (checked with real drive times by eval/check_tasks.py)
+    feas_path = os.path.join(os.path.dirname(path), "feasible.csv")
+    if os.path.exists(feas_path):
+        feas = pd.read_csv(feas_path)
+        impossible = set(feas.loc[feas["valid_plans"] == 0, "task_id"])
+        if impossible & set(df["task_id"]):
+            print(f"Skipping impossible tasks (0 valid plans): {sorted(impossible & set(df['task_id']))}")
+        df = df[~df["task_id"].isin(impossible)].copy()
     if df.empty:
         print("No usable runs yet. Re-run eval.run_eval once Gemini is available.")
         return

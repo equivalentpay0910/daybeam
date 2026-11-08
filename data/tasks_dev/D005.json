@@ -1,9 +1,9 @@
 {
   "id": "D005",
-  "request_text": "Plan my day starting at 08:00: a park walk for 20 min; groceries for 30 min; the library (arrive 13:00 to 15:30) for 45 min; a farmers market (arrive 08:00 to 11:00) for 20 min. Home by 15:00, spend at most $26, and drive at most 10 minutes total.",
+  "request_text": "Plan my day starting at 08:15: a park walk for 20 min; groceries for 30 min; the library (arrive 13:00 to 15:30) for 45 min; a farmers market (arrive 08:00 to 11:00) for 20 min. Home by 15:00, spend at most $26, and drive at most 10 minutes total.",
   "start_place_id": "P_home_01",
   "end_place_id": "P_home_01",
-  "day_start": "08:00",
+  "day_start": "08:15",
   "day_end": "15:00",
   "budget_usd": 26,
   "max_drive_min": 10,

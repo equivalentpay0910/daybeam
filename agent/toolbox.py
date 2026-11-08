@@ -144,10 +144,13 @@ def simulate(task: Task, stops: list[PlannedStop], finish: bool = True) -> Check
         if r.window and arrive > to_min(r.window[1]):
             violations.append(Violation(rule="window", stop_id=ps.stop_id,
                                         detail=f"arrived {to_hhmm(arrive)}, window ends {r.window[1]}"))
-        if arrive < to_min(place.open):
-            arrive = to_min(place.open)   # wait for the place to open
         depart = arrive + r.duration_min
-        if depart > to_min(place.close):
+        # interfaces.md: the place must be open when you ARRIVE and still open when you leave
+        # (you only wait for a time window, not for a place to open; same rule as Kami's verifier)
+        if arrive < to_min(place.open):
+            violations.append(Violation(rule="closed", stop_id=ps.stop_id,
+                                        detail=f"{place.name} opens {place.open}, you arrive {to_hhmm(arrive)}"))
+        elif depart > to_min(place.close):
             violations.append(Violation(rule="closed", stop_id=ps.stop_id,
                                         detail=f"{place.name} closes {place.close}, you leave {to_hhmm(depart)}"))
         if r.max_price_usd is not None and place.price_usd > r.max_price_usd:
@@ -160,11 +163,37 @@ def simulate(task: Task, stops: list[PlannedStop], finish: bool = True) -> Check
 
     end_time = None
     if not finish:
-        # forward check: a stop we haven't done yet whose window has ALREADY closed can never be met
+        # Forward checking (like CSPs in class): look at every stop we haven't done yet and ask
+        # "even if we drove there RIGHT NOW, could it still work?" If not, this partial plan is dead.
+        # Driving straight there is the fastest possible way, so this never throws away a plan that could work.
         for sid, r in req.items():
-            if sid not in seen and r.window and clock > to_min(r.window[1]):
+            if sid in seen:
+                continue
+            if r.kind == "fixed":
+                options = [r.place_id]
+            else:
+                options = [p.id for p in load_places() if p.category == r.category
+                           and (r.max_price_usd is None or p.price_usd <= r.max_price_usd)]
+            possible = False
+            for pid in options:
+                pl = get_place(pid)
+                arrive = clock + route(here, pid)
+                if r.window and arrive > to_min(r.window[1]):
+                    continue                      # would miss the window
+                if r.window:
+                    arrive = max(arrive, to_min(r.window[0]))
+                arrive = max(arrive, to_min(pl.open))
+                if arrive + r.duration_min > to_min(pl.close):
+                    continue                      # would close before we finish
+                if arrive + r.duration_min + route(pid, task.end_place_id) > to_min(task.day_end):
+                    continue                      # couldn't get home in time
+                possible = True
+                break
+            if not possible:
                 violations.append(Violation(rule="window", stop_id=sid,
-                                            detail=f"it's {to_hhmm(clock)}, window for {sid} closed at {r.window[1]}"))
+                                            detail=f"at {to_hhmm(clock)} no place for {sid} can still fit"))
+        if clock + route(here, task.end_place_id) > to_min(task.day_end):
+            violations.append(Violation(rule="late_end", detail="can't get home in time from here"))
     if finish:
         for sid in req:
             if sid not in seen:
