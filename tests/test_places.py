@@ -26,7 +26,12 @@ def test_find_places_filters():
         max_price_usd=20
     )
 
-    assert len(places) == 3
+    # count the restaurants under $20 in places.csv, so the test still works when places are added
+    import csv
+    with open("data/places.csv", newline="") as f:
+        expected = sum(1 for r in csv.DictReader(f)
+                       if r["category"] == "restaurant" and float(r["price_usd"]) <= 20)
+    assert len(places) == min(expected, 10)
     assert all(p.category == "restaurant" for p in places)
     assert all(p.price_usd <= 20 for p in places)
     assert "P_rest_03" not in [p.id for p in places]
