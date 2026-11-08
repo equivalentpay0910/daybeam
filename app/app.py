@@ -86,13 +86,15 @@ def enable_tab_create():
             # call method from Kami to clean the task here
 
             planResult = plan(task=task, method=method, seed=seed, beam_width=beamWidth)
-            st.session_state["planResult"] = planResult
-            st.session_state["display_maps"] = []
-            iteration = 0
-            finished = False
-            while(not finished):
-                finished = iterate_history(iteration, 1.2, 5)
-                iteration += 1
+            if planResult:
+                st.session_state["plan_result"] = planResult
+                st.session_state["display_maps"] = []
+                iteration = 0
+                finished = False
+                while(not finished):
+                    finished = iterate_history(iteration, 1.2, 5)
+                    iteration += 1
+                st.rerun()
         
         except Exception as e:
             st.error(e)
@@ -646,7 +648,7 @@ def marker_html(color : str, text : str):
         border-bottom: 2px solid {color};
         border-right: 2px solid {color};
         transform: rotate(45deg);
-        margin-top: -6px; /* Pulls the square up behind the pill without leaving an invisible gap below */
+        margin-top: -6px;
         z-index: 1;
     "></div>
 </div>
