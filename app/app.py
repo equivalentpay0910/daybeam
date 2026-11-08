@@ -82,9 +82,7 @@ def enable_tab_create():
                 budget_usd=round(budget, 2),
                 max_drive_min=drive,
                 stops=list(st.session_state["selected_stops"].values())) # id -1 is a placeholder value. Will be replaced with the clean task method from Kami
-
             # call method from Kami to clean the task here
-
             planResult = plan(task=task, method=method, seed=seed, beam_width=beamWidth)
             if planResult:
                 st.session_state["plan_result"] = planResult
@@ -696,6 +694,8 @@ def build_search_tree_graph(plan_result: PlanResult):
 
         for node in parentDict[currentParent][True]:
             label = f"Node: {node.node_id}\nDepth: {node.depth}\nStops: {len(node.partial_plan)}"
+            if node.score:
+                label+="\nScore: {node.score}"
             graph.node(str(node.node_id), label=label, fillcolor="lightblue", fontcolor="black")
 
             if currentParent is not None:
@@ -720,6 +720,8 @@ def build_search_tree_graph(plan_result: PlanResult):
 
         for node in unkept:
             label = f"Node: {node.node_id}\nDepth: {node.depth}\nStops: {len(node.partial_plan)}"
+            if node.score:
+                label+="\nScore: {node.score}"
             graph.node(str(node.node_id), label=label, fillcolor="lightgrey", fontcolor="grey")
 
             if currentParent is not None:
