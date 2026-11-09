@@ -417,7 +417,7 @@ def validate_all_budgets():
     for selected_stop_id in list(st.session_state["selected_stops"].keys()):
         if st.session_state[f"budget_{selected_stop_id}"]:
             st.session_state[f"budget_{selected_stop_id}"] = min(st.session_state[f"budget_{selected_stop_id}"], st.session_state["budget"])
-            st.session_state["selected_stops"][selected_stop_id].duration_min = st.session_state[f"budget_{selected_stop_id}"]
+            st.session_state["selected_stops"][selected_stop_id].max_price_usd = st.session_state[f"budget_{selected_stop_id}"]
 
 def update_budget(key : str, stopId : str):
     """Connects the budget field to the stop request budget variable"""
