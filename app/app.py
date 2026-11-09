@@ -3,7 +3,7 @@ from datetime import time
 import hashlib, heapq, pathlib, sys, traceback
 from itertools import count
 from typing import Literal
-from collections import defaultdict, deque
+from collections import deque
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[1]))  # lets the app import core/, agent/, tools/
 from agent.planner import plan
@@ -157,6 +157,7 @@ def enable_tab_display():
         traceback.print_exc()
 
 def make_method_info():
+    """Creates the form regarding the agent parameters."""
     method = st.selectbox("Planner", ["one_shot", "react", "beam"])
     if method == "beam":
         colSeed, colBeamWidth = st.columns(2)
@@ -206,14 +207,17 @@ def make_budget_and_drive():
             min_value=0.0,
             step=0.01,
             format="%.2f",
-            key="budget"
+            key="budget",
+            on_change=validate_all_budgets
         )
     with colDrive:
         drive = st.number_input(
             "Enter driving time (minutes)",
             min_value=0.0,
             step=1.0,
-            key="drive"
+            key="drive",
+            on_change=validate_minutes,
+            args=("drive",)
         )
     return budget, drive
 
@@ -273,6 +277,8 @@ def generate_stop_forms():
                 st.session_state[f"time_l_{selected_stop_id}"] = None
             if f"dur_{selected_stop_id}" not in st.session_state:
                 st.session_state[f"dur_{selected_stop_id}"] = 30
+            if f"budget_{selected_stop_id}" not in st.session_state:
+                st.session_state[f"budget_{selected_stop_id}"] = None
 
             if selected_stop.kind == "flexible":
                 name = selected_stop.category
@@ -307,10 +313,11 @@ def generate_stop_forms():
                         "Enter budget (USD)",
                         min_value=0.0,
                         step=0.01,
+                        value=None,
                         format="%.2f",
                         key=f"budget_{selected_stop_id}",
                         on_change=update_budget,
-                        args=(f"dur_{selected_stop_id}", selected_stop_id)
+                        args=(f"budget_{selected_stop_id}", selected_stop_id)
                     )
                 if st.button("Remove stop",
                     key=f"button_remove_{selected_stop_id}"):
@@ -318,6 +325,7 @@ def generate_stop_forms():
                     del st.session_state[f"time_e_{selected_stop_id}"]
                     del st.session_state[f"time_l_{selected_stop_id}"]
                     del st.session_state[f"dur_{selected_stop_id}"]
+                    del st.session_state[f"budget_{selected_stop_id}"]
                     del st.session_state[f"button_remove_{selected_stop_id}"]
                     st.rerun()
         except Exception as e:
@@ -354,6 +362,7 @@ def update_order_time_border():
         st.session_state["time_d_e"], st.session_state["time_d_l"] = st.session_state["time_d_l"], st.session_state["time_d_e"]
     for selected_stop_id in list(st.session_state["selected_stops"].keys()):
         update_order_time(f"time_e_{selected_stop_id}", f"time_l_{selected_stop_id}", selected_stop_id)
+    validate_all_minutes()
 
 def update_order_time(earlierKey : str, laterKey : str, stopId : str):
     """Validates and updates stop time"""
@@ -379,12 +388,41 @@ def validate_time(key : str):
     if st.session_state[key]:
         st.session_state[key] = min(max(st.session_state[key], st.session_state["time_d_e"]), st.session_state["time_d_l"])
 
+def validate_minutes(key : str):
+    """Ensures that the value of any given number of minutes is within the range of the day frame."""
+    if st.session_state[key]:
+        late = st.session_state["time_d_l"].hour*60+st.session_state["time_d_l"].minute
+        early = st.session_state["time_d_e"].hour*60+st.session_state["time_d_e"].minute
+        delta = late-early
+        st.session_state[key] = min(st.session_state[key], delta)
+
+def validate_all_minutes():
+    """Ensures that the value of all numbers of minutes are within the range of the day frame."""
+    late = st.session_state["time_d_l"].hour*60+st.session_state["time_d_l"].minute
+    early = st.session_state["time_d_e"].hour*60+st.session_state["time_d_e"].minute
+    delta = late-early
+
+    if st.session_state["drive"]:
+        st.session_state["drive"] = min(st.session_state["drive"], delta)
+    for selected_stop_id in list(st.session_state["selected_stops"].keys()):
+        st.session_state[f"dur_{selected_stop_id}"] = min(st.session_state[f"dur_{selected_stop_id}"], delta)
+        st.session_state["selected_stops"][selected_stop_id].duration_min = st.session_state[f"dur_{selected_stop_id}"]
+
 def update_duration(key : str, stopId : str):
     """Connects the duration field to the stop request duration variable"""
+    validate_minutes(key)
     st.session_state["selected_stops"][stopId].duration_min = st.session_state[key]
+
+def validate_all_budgets():
+    for selected_stop_id in list(st.session_state["selected_stops"].keys()):
+        if st.session_state[f"budget_{selected_stop_id}"]:
+            st.session_state[f"budget_{selected_stop_id}"] = min(st.session_state[f"budget_{selected_stop_id}"], st.session_state["budget"])
+            st.session_state["selected_stops"][selected_stop_id].duration_min = st.session_state[f"budget_{selected_stop_id}"]
 
 def update_budget(key : str, stopId : str):
     """Connects the budget field to the stop request budget variable"""
+    if st.session_state[key]:
+        st.session_state[key] = min(st.session_state[key], st.session_state["budget"])
     st.session_state["selected_stops"][stopId].max_price_usd = st.session_state[key]
 
 def calculate_index(iteration : int, growthBase : float, batchSize : int):
@@ -463,9 +501,10 @@ def iterate_history(iteration : int, growth_base : float, batch_size : int):
         else:
             st.session_state["display_maps"].append({"type": "blank"})
         return True
-    if searchLog[startingIndex].score is not None:
-        endingIndex = min(calculate_index(iteration+1, growth_base, batch_size), len(searchLog))
-        topFiveNodes : list[SearchNode] = heapq.nlargest(5, searchLog[startingIndex : endingIndex], key=lambda node: node.score)
+    endingIndex = min(calculate_index(iteration+1, growth_base, batch_size), len(searchLog))
+    searchSlice = [x for x in searchLog[startingIndex : endingIndex] if x.score is not None]
+    if len(searchSlice)>5:
+        topFiveNodes : list[SearchNode] = heapq.nlargest(5, searchSlice, key=lambda node: node.score)
     else:
         topFiveNodes : list[SearchNode] = searchLog[startingIndex : min(startingIndex+5, len(searchLog))]
     st.session_state["display_maps"].append({
@@ -595,7 +634,7 @@ def check_stop(stop : StopRequest, coordinatePath : list[tuple[int]], counter : 
             if markerCluster and counter:
                 window = f"{stop.window[0]}-{stop.window[1]}"
                 markerHtml = marker_html(color, str(next(counter)))
-                popupHtml = f'<div style="white-space: nowrap;">Arrival Window: {escape(str(window))}<br>Duration: {escape(str(stop.duration_min))}</div>'
+                popupHtml = f'<div style="white-space: nowrap;">Arrival Window: {escape(str(window))}<br>Duration: {escape(str(stop.duration_min))}<br>Budget: {escape(str(stop.max_price_usd))}</div>'
                 folium.Marker(coordinates, 
                                 popup=folium.Popup(popupHtml, max_width=500),
                                 tooltip=row[tooltipKey],
