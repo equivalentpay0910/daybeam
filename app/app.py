@@ -41,7 +41,7 @@ def initialize_state_if_not_already():
     if "initialized" not in st.session_state:
         st.session_state["search_map_stops"] = []
         st.session_state["df"] = pd.read_csv("data/places.csv").dropna()
-        st.session_state["plan_result"] = get_default_map_show_iterate(20)
+        st.session_state["plan_result"] = get_default_map_show_iterate(15)
         st.session_state["display_maps"] = []
         iteration = 0
         finished = False
@@ -449,9 +449,10 @@ def get_default_map_show_iterate(size : int = 20):
     
     for i in range(size):
         curr = next(counter)
+        keptList = np.random.choice([True, False], size=round(pow(1.3, i+1)), p=[0.6, 0.4])
+        scoreList = sum(scores[:i+1])-rng.integers(low=0, high=10, size=round(pow(1.3, i+1)))
         if i>0:
             parents = rng.integers(low=last, high=curr, size=round(pow(1.3, i+1)))
-            keptList = np.random.choice([True, False], size=round(pow(1.3, i+1)), p=[0.8, 0.2])
             for j in range(round(pow(1.3, i+1))):
                 if parentDict[parents[j]].kept:
                     kept = keptList[j]
@@ -460,7 +461,7 @@ def get_default_map_show_iterate(size : int = 20):
                 num = next(counter)
                 node = SearchNode(node_id=num, depth=i+1, 
                                 partial_plan=[stops[0]]+[stop for stop in np.random.choice(stopsCategory, size=i+1)], 
-                                score=sum(scores[:i+1])+rng.integers(low=0, high=10),
+                                score=scoreList[j],
                                 parent_id=parents[j], kept=kept)
                 planResult.search_log.append(node)
                 parentDict[num] = node
@@ -470,12 +471,11 @@ def get_default_map_show_iterate(size : int = 20):
             planResult.search_log.append(node)
             parentDict[num] = node
         else:
-            keptList = np.random.choice([True, False], size=round(pow(1.3, i+1)))
             for j in range(round(pow(1.3, i+1))):
                 num = next(counter)
                 node = SearchNode(node_id=num, depth=i+1, 
                                     partial_plan=[stops[0]]+[stop for stop in np.random.choice(stopsCategory, size=i+1)], 
-                                    score=sum(scores[:i+1])+rng.integers(low=0, high=10),
+                                    score=scoreList[j],
                                     parent_id=1, kept=keptList[j])
                 planResult.search_log.append(node)
                 parentDict[num] = node
